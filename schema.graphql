@@ -1,6 +1,17 @@
-type ExampleEntity @entity {
-  id: ID!
-  count: BigInt!
-  candidateId: BigInt! # uint256
-  candidateName: String! # string
+type CandidateAdded @entity {
+    id: ID!
+    candidateId: BigInt!
+    candidateName: String!
+}
+
+type Voted @entity {
+    id: ID!
+    candidateId: BigInt!
+}
+
+type ActiveCandidate @entity {
+    id: ID!
+    candidateId: BigInt!
+    candidateName: String!
+    votes: BigInt!
 }

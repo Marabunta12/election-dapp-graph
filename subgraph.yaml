@@ -1,26 +1,27 @@
 specVersion: 0.0.4
 schema:
-  file: ./schema.graphql
+    file: ./schema.graphql
 dataSources:
-  - kind: ethereum
-    name: Election
-    network: goerli
-    source:
-      address: "0xf2C897FfdEb6460D10C53ACe650ffB9C686B94de"
-      abi: Election
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.6
-      language: wasm/assemblyscript
-      entities:
-        - CandidateAdded
-        - Voted
-      abis:
-        - name: Election
-          file: ./abis/Election.json
-      eventHandlers:
-        - event: CandidateAdded(indexed uint256,string)
-          handler: handleCandidateAdded
-        - event: Voted(uint256)
-          handler: handleVoted
-      file: ./src/election.ts
+    - kind: ethereum
+      name: Election
+      network: goerli
+      source:
+          address: "0xf2C897FfdEb6460D10C53ACe650ffB9C686B94de"
+          abi: Election
+          startBlock: 8732743
+      mapping:
+          kind: ethereum/events
+          apiVersion: 0.0.6
+          language: wasm/assemblyscript
+          entities:
+              - CandidateAdded
+              - Voted
+          abis:
+              - name: Election
+                file: ./abis/Election.json
+          eventHandlers:
+              - event: CandidateAdded(indexed uint256,string)
+                handler: handleCandidateAdded
+              - event: Voted(uint256)
+                handler: handleVoted
+          file: ./src/election.ts

@@ -1,52 +1,43 @@
-import { BigInt } from "@graphprotocol/graph-ts"
-import { Election, CandidateAdded, Voted } from "../generated/Election/Election"
-import { ExampleEntity } from "../generated/schema"
+import { BigInt } from "@graphprotocol/graph-ts";
+import {
+    CandidateAdded as CandidateAddedEvent,
+    Voted as VotedEvent,
+} from "../generated/Election/Election";
+import { CandidateAdded, Voted, ActiveCandidate } from "../generated/schema";
 
-export function handleCandidateAdded(event: CandidateAdded): void {
-  // Entities can be loaded from the store using a string ID; this ID
-  // needs to be unique across all entities of the same type
-  let entity = ExampleEntity.load(event.transaction.from.toHex())
+export function handleCandidateAdded(event: CandidateAddedEvent): void {
+    let candidateAdded = CandidateAdded.load(event.params.candidateId.toHexString());
+    let activeCandidate = ActiveCandidate.load(event.params.candidateId.toHexString());
 
-  // Entities only exist after they have been saved to the store;
-  // `null` checks allow to create entities on demand
-  if (!entity) {
-    entity = new ExampleEntity(event.transaction.from.toHex())
+    if (!candidateAdded) {
+        candidateAdded = new CandidateAdded(event.params.candidateId.toHexString());
+    }
+    if (!activeCandidate) {
+        activeCandidate = new ActiveCandidate(event.params.candidateId.toHexString());
+    }
 
-    // Entity fields can be set using simple assignments
-    entity.count = BigInt.fromI32(0)
-  }
+    candidateAdded.candidateId = event.params.candidateId;
+    candidateAdded.candidateName = event.params.candidateName;
 
-  // BigInt and BigDecimal math are supported
-  entity.count = entity.count + BigInt.fromI32(1)
+    activeCandidate.candidateId = event.params.candidateId;
+    activeCandidate.candidateName = event.params.candidateName;
+    activeCandidate.votes = BigInt.fromI32(0);
 
-  // Entity fields can be set based on event parameters
-  entity.candidateId = event.params.candidateId
-  entity.candidateName = event.params.candidateName
-
-  // Entities can be written to the store with `.save()`
-  entity.save()
-
-  // Note: If a handler doesn't require existing field values, it is faster
-  // _not_ to load the entity from the store. Instead, create it fresh with
-  // `new Entity(...)`, set the fields that should be updated and save the
-  // entity back to the store. Fields that were not set or unset remain
-  // unchanged, allowing for partial updates to be applied.
-
-  // It is also possible to access smart contracts from mappings. For
-  // example, the contract that has emitted the event can be connected to
-  // with:
-  //
-  // let contract = Contract.bind(event.address)
-  //
-  // The following functions can then be called on this contract to access
-  // state variables and other data:
-  //
-  // - contract.getAdmin(...)
-  // - contract.getCandidate(...)
-  // - contract.getCandidatesCount(...)
-  // - contract.getElectionState(...)
-  // - contract.getVoter(...)
-  // - contract.getVotersCount(...)
+    candidateAdded.save();
+    activeCandidate.save();
 }
 
-export function handleVoted(event: Voted): void {}
+export function handleVoted(event: VotedEvent): void {
+    let voted = Voted.load(event.params.candidateId.toHexString());
+    let activeCandidate = ActiveCandidate.load(event.params.candidateId.toHexString());
+
+    if (!voted) {
+        voted = new Voted(event.params.candidateId.toHexString());
+    }
+
+    voted.candidateId = event.params.candidateId;
+    activeCandidate!.votes = activeCandidate!.votes.plus(BigInt.fromI32(1));
+
+    voted.save();
+    activeCandidate!.save();
+}
